@@ -1,0 +1,45 @@
+-- 1. PROFILLER (KULLANICILAR) TABLOSU
+CREATE TABLE profiles (
+  id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+  full_name TEXT,
+  student_number TEXT,
+  role TEXT DEFAULT 'standart_user'
+);
+
+-- 2. TRANSACTIONS (HARCAMALAR VE BORÇLAR) TABLOSU
+CREATE TABLE transactions (
+  id UUID DEFAULT auth.uid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  amount DECIMAL(10,2) NOT NULL,
+  description TEXT,
+  is_debt BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 3. ACTIVITY LOGS (LOG KAYITLARI) TABLOSU
+CREATE TABLE activity_logs (
+  id SERIAL PRIMARY KEY,
+  user_id UUID,
+  action_type TEXT,
+  details TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 4. OTOMATİK LOG TUTAN TRIGGER (TETİKLEYİCİ)
+CREATE OR REPLACE FUNCTION log_transaction_insert_action()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO activity_logs (user_id, action_type, details)
+  VALUES (
+    NEW.user_id, 
+    'EKLEME', 
+    'Yeni bir kayit eklendi. Tutar: ' || NEW.amount || ' TL.'
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_after_insert_transaction
+AFTER INSERT ON transactions
+FOR EACH ROW
+EXECUTE FUNCTION log_transaction_insert_action();
