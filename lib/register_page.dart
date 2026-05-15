@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'home_page.dart';
-import 'register_page.dart'; // Yeni eklediğimiz sayfanın import bağlantısı
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _signIn() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+  // Supabase ile Kayıt Olma Fonksiyonu
+  Future<void> _signUp() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty || _nameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Lütfen tüm alanları doldurun!")),
       );
@@ -28,21 +28,26 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      await Supabase.instance.client.auth.signInWithPassword(
+      // Supabase Auth kullanarak kullanıcı oluşturuyoruz
+      final response = await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
+        data: {
+          'full_name': _nameController.text.trim(),
+        },
       );
 
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomePage()),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Kayıt başarılı! Şimdi giriş yapabilirsiniz.")),
         );
+        // Kayıt başarılı olunca Giriş Ekranına geri dönüyoruz
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Giriş Hatası: ${e.toString()}")),
+          SnackBar(content: Text("Kayıt Hatası: ${e.toString()}")),
         );
       }
     } finally {
@@ -58,16 +63,14 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Harcama & Borç Takip"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text("Kayıt Ol")),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Center(
@@ -76,14 +79,15 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.account_balance_wallet, size: 80, color: Colors.blue),
-                const SizedBox(height: 24),
-                const Text(
-                  "Hoş Geldiniz",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: "Ad Soyad",
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -105,27 +109,12 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _signIn,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
+                  onPressed: _isLoading ? null : _signUp,
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                   child: _isLoading
                       ? const CircularProgressIndicator()
-                      : const Text("Giriş Yap", style: TextStyle(fontSize: 16)),
+                      : const Text("Hesap Oluştur", style: TextStyle(fontSize: 16)),
                 ),
-                const SizedBox(height: 16),
-                
-                // ARADIĞIMIZ TEXTBUTTON KISMI TAM OLARAK BURASI:
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const RegisterPage()),
-                    );
-                  },
-                  child: const Text("Hesabın yok mu? Kayıt Ol"),
-                ),
-                
               ],
             ),
           ),
