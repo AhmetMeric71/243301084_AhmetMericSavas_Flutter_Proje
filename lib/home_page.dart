@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_page.dart';
+import 'add_transaction_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -113,11 +114,17 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // İleride buraya Ekleme Sayfası'na giden kodu yazacağız
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Yakında: Yeni Harcama Ekleme Ekranı")),
+        onPressed: () async {
+          // Ekleme sayfasına gidiyoruz ve dönen sonucu bekliyoruz
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddTransactionPage()),
           );
+          
+          // Eğer yeni bir şey eklenip geri dönüldüyse listeyi otomatik yenile
+          if (result == true) {
+            _fetchTransactions();
+          }
         },
         child: const Icon(Icons.add),
       ),
