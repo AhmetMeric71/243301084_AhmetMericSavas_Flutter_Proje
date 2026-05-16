@@ -9,7 +9,7 @@ void main() async {
 
   // BURASI KRİTİK: Supabase bağlantısını başlatıyoruz
   await Supabase.initialize(
-    url: 'https://kykjolaanudirklgbbte.supabase.co/rest/v1/',
+    url: 'https://kykjolaanudirklgbbte.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5a2pvbGFhbnVkaXJrbGdiYnRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDc3NjEsImV4cCI6MjA5NDE4Mzc2MX0.TsM6hmRyf9MwHo6Y3hdPsVPbLnqvUC1sz1uXMrjznBU',
   );
 
