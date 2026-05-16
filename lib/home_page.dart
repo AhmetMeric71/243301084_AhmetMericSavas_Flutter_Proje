@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'login_page.dart';
 import 'add_transaction_page.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -70,6 +71,16 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             onPressed: _signOut,
             icon: const Icon(Icons.logout, color: Colors.red),
+          ),
+          // Sağ üst köşeye profil butonu ekledik
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
+              );
+            },
+            icon: const Icon(Icons.person, color: Colors.blue),
           ),
         ],
       ),
