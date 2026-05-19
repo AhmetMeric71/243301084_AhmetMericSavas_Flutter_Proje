@@ -102,15 +102,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Ahmet Yılmaz", // KENDİ ADINI YAZABİLİRSİN
+                                "Ahmet Meriç Savaş", // KENDİ ADINI YAZABİLİRSİN
                                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                "Öğrenci No: 123456789", // KENDİ NUMARANI YAZABİLİRSİN
+                                "Öğrenci No: 243301084", // KENDİ NUMARANI YAZABİLİRSİN
                                 style: TextStyle(color: Colors.black54),
                               ),
                               Text(
-                                "VTYS & Mobil Programlama Ödevi",
+                                "Mobil Programlama Ödevi",
                                 style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
                               ),
                             ],

@@ -45,6 +45,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         'amount': amount,
         'description': _descriptionController.text.trim(),
         'is_debt': _isDebt,
+        'created_at': DateTime.now().toIso8601String(),
       });
 
       if (mounted) {
