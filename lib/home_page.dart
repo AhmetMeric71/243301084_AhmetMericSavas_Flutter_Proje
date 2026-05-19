@@ -65,13 +65,37 @@ class _HomePageState extends State<HomePage> {
     for (var tx in _transactions) {
       final amount = double.tryParse(tx['amount'].toString()) ?? 0.0;
       final isDebt = tx['is_debt'] as bool? ?? false;
-      if (isDebt) {
-        balance += amount;
+      final desc = tx['description'].toString();
+
+      if (desc.startsWith("[MAAŞ]")) {
+        balance += amount; // Maaş ise bakiyeyi ARTIR
+      } else if (isDebt) {
+        balance += amount; // Borç alındıysa bakiyeyi ARTIR
       } else {
-        balance -= amount;
+        balance -= amount; // Normal harcamaysa bakiyeyi AZALT
       }
     }
     return balance;
+  }
+  double _calculateSavings() {
+    double savings = 0.0;
+    for (var tx in _transactions) {
+      final amount = double.tryParse(tx['amount'].toString()) ?? 0.0;
+      final desc = tx['description'].toString().toLowerCase();
+      final isDebt = tx['is_debt'] as bool? ?? false;
+
+      // Eğer açıklama tamamen "kumbara" ise veya "kumbara" kelimesiyle başlıyorsa
+      if (desc.startsWith("kumbara")) {
+        if (tx['description'].toString().startsWith("[MAAŞ]")) {
+          // Kumbaradan para çekme işlemi (Gelir olarak kaydettireceğiz)
+          savings -= amount;
+        } else if (!isDebt) {
+          // Kumbaraya para atma işlemi (Harcama olarak kaydettireceğiz)
+          savings += amount;
+        }
+      }
+    }
+    return savings;
   }
   @override
   Widget build(BuildContext context) {
@@ -139,7 +163,68 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.deepPurple.shade400, Colors.deepPurple.shade700],
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,  
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Kumbaradaki Toplam Birikim",
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${_calculateSavings().toStringAsFixed(2)} TL",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const Icon(Icons.savings, color: Colors.white, size: 40),
+              ],
+            ),
+          ),
+
+          // KUMBARA HIZLI İŞLEM BUTONLARI
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.purple.shade50),
+                    icon: const Icon(Icons.add, color: Colors.purple),
+                    label: const Text("Kumbaraya At", style: TextStyle(color: Colors.purple)),
+                    onPressed: () => _showKumbaraDialog(true), // Para Ekle
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.purple.shade50),
+                    icon: const Icon(Icons.remove, color: Colors.purple),
+                    label: const Text("Kumbaradan Çek", style: TextStyle(color: Colors.purple)),
+                    onPressed: () => _showKumbaraDialog(false), // Para Çek
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
           // İŞLEMLER LİSTESİ
           Expanded(
             child: _transactions.isEmpty
@@ -156,27 +241,45 @@ class _HomePageState extends State<HomePage> {
                           : DateTime.now();
                       final dateStr = "${createdAtRaw.day.toString().padLeft(2, '0')}/${createdAtRaw.month.toString().padLeft(2, '0')}/${createdAtRaw.year}";
                       final timeStr = "${createdAtRaw.hour.toString().padLeft(2, '0')}:${createdAtRaw.minute.toString().padLeft(2, '0')}";
+                      final desc = tx['description'] ?? "Açıklama Yok";
+                      final isMaaS = desc.startsWith("[MAAŞ]");
 
+                      // Ekranda "[MAAŞ] Maaşım" yerine temiz "Maaşım" görünsün diye yazıyı ayıklıyoruz
+                      final cleanDesc = isMaaS ? desc.replaceAll("[MAAŞ] ", "") : desc; 
+
+                      Color avatarBg = Colors.red.shade100;
+                      IconData leadingIcon = Icons.arrow_upward;
+                      Color iconColor = Colors.red;
+                      String prefix = "-";
+
+                      if (isMaaS) {
+                        avatarBg = Colors.blue.shade100;
+                        leadingIcon = Icons.account_balance_wallet;
+                        iconColor = Colors.blue;
+                        prefix = "+";
+                      } else if (isDebt) {
+                        avatarBg = Colors.green.shade100;
+                        leadingIcon = Icons.arrow_downward;
+                        iconColor = Colors.green;
+                        prefix = "+";
+                      }
                       return Card(
                         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                         elevation: 2,
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: isDebt ? Colors.green.shade100 : Colors.red.shade100,
-                            child: Icon(
-                              isDebt ? Icons.arrow_downward : Icons.arrow_upward,
-                              color: isDebt ? Colors.green : Colors.red,
-                            ),
+                            backgroundColor: avatarBg, // Değişken yaptık
+                            child: Icon(leadingIcon, color: iconColor), // Değişken yaptık
                           ),
                           title: Text(
-                            tx['description'] ?? "Açıklama Yok",
+                            cleanDesc, // Ayıklanmış temiz açıklamayı koyduk
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text("$dateStr - $timeStr"), 
                           trailing: Text(
-                            "${isDebt ? '+' : '-'}${tx['amount']} TL",
+                            "$prefix${tx['amount']} TL", // Prefix'i değişken yaptık (+ veya -)
                             style: TextStyle(
-                              color: isDebt ? Colors.green : Colors.red,
+                              color: iconColor, // Rengi dinamik yaptık
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
@@ -202,6 +305,49 @@ class _HomePageState extends State<HomePage> {
           }
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+  // Kumbaraya para atma/çekme pop-up penceresi
+  void _showKumbaraDialog(bool isAdding) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isAdding ? "Kumbaraya Para At" : "Kumbaradan Para Çek"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: "Tutar (TL)", border: OutlineInputBorder()),
+          keyboardType: TextInputType.number,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("İptal")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+            onPressed: () async {
+              final amount = double.tryParse(controller.text.trim());
+              if (amount == null || amount <= 0) return;
+
+              final user = Supabase.instance.client.auth.currentUser;
+              
+              // Kumbara mantığına göre veritabanına kayıt atıyoruz
+              await Supabase.instance.client.from('transactions').insert({
+                'user_id': user?.id,
+                'amount': amount,
+                // Eğer çekiyorsak bakiye fonksiyonu artı saysın diye [MAAŞ] etiketi koyuyoruz
+                'description': isAdding ? "Kumbara: Birikim" : "[MAAŞ] Kumbara: Çekilen",
+                'is_debt': false,
+                'created_at': DateTime.now().toIso8601String(),
+              });
+
+              if (mounted) {
+                Navigator.pop(context);
+                _fetchTransactions(); // Listeyi ve bakiyeleri yenile
+              }
+            },
+            child: const Text("Onayla", style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
