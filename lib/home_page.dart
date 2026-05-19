@@ -344,7 +344,7 @@ class _HomePageState extends State<HomePage> {
                 
                 const Divider(height: 16),
 
-                // İŞLEMLER LİSTESİ (Expanded ile sarmalandı, hata vermez)
+                // İŞLEMLER LİSTESİ 
                 Expanded(
                   child: _transactions.isEmpty
                       ? const Center(child: Text("Henüz bir kayıt eklenmedi."))
@@ -411,15 +411,15 @@ class _HomePageState extends State<HomePage> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // AddTransactionPage'in import edildiğinden emin ol abim
+    
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const AddTransactionPage(), // Ekleme ekranının sınıf adı
+              builder: (_) => const AddTransactionPage(), 
             ),
           );
           if (result == true) {
-            _fetchTransactions(); // Yeni veri geldiyse listeyi yenile
+            _fetchTransactions(); 
           }
         },
         child: const Icon(Icons.add),

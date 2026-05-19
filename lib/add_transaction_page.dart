@@ -12,7 +12,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   
-  // 0: Harcama, 1: Borç, 2: Maaş/Gelir
   int _selectedType = 0; 
   bool _isLoading = false;
 
@@ -40,12 +39,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     try {
       final user = Supabase.instance.client.auth.currentUser;
       
-      // Türlere göre veritabanına nasıl yazılacağını belirliyoruz
       bool isDebt = _selectedType == 1;
       String finalDescription = descriptionText;
       
       if (_selectedType == 2) {
-        // Eğer Maaş/Gelir seçildiyse başına etiket koyuyoruz
         finalDescription = "[MAAŞ] $descriptionText";
       }
 
@@ -58,7 +55,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       });
 
       if (mounted) {
-        Navigator.pop(context, true); // Başarılıysa geri dön
+        Navigator.pop(context, true); 
       }
     } catch (e) {
       if (mounted) {
@@ -81,7 +78,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // İŞLEM TÜRÜ SEÇİMİ (Segmented Button / Üçlü Seçenek)
+                  // İŞLEM TÜRÜ SEÇİMİ
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

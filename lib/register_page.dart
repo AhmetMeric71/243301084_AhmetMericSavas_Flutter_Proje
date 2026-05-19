@@ -14,7 +14,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _nameController = TextEditingController();
   bool _isLoading = false;
 
-  // Supabase ile Kayıt Olma Fonksiyonu
   Future<void> _signUp() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty || _nameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -28,7 +27,6 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      // Supabase Auth kullanarak kullanıcı oluşturuyoruz
       final response = await Supabase.instance.client.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -41,7 +39,6 @@ class _RegisterPageState extends State<RegisterPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Kayıt başarılı! Şimdi giriş yapabilirsiniz.")),
         );
-        // Kayıt başarılı olunca Giriş Ekranına geri dönüyoruz
         Navigator.pop(context);
       }
     } catch (e) {

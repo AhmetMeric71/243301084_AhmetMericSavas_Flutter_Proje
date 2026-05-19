@@ -27,7 +27,6 @@ class _ProfilePageState extends State<ProfilePage> {
     _fetchProfileAndLogs();
   }
 
-  // Hem kullanıcı bilgisini hem de Trigger'ın yazdığı logları çekiyoruz
   Future<void> _fetchProfileAndLogs() async {
     try {
       final user = _supabase.auth.currentUser;
@@ -36,7 +35,6 @@ class _ProfilePageState extends State<ProfilePage> {
           _userEmail = user.email ?? "";
         });
 
-        // activity_logs tablosundan bu kullanıcıya ait logları çekiyoruz (Seçme Sorgusu)
         final response = await _supabase
             .from('activity_logs')
             .select()
@@ -102,11 +100,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Ahmet Meriç Savaş", // KENDİ ADINI YAZABİLİRSİN
+                                "Ahmet Meriç Savaş", 
                                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                "Öğrenci No: 243301084", // KENDİ NUMARANI YAZABİLİRSİN
+                                "Öğrenci No: 243301084", 
                                 style: TextStyle(color: Colors.black54),
                               ),
                               Text(
